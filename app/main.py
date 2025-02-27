@@ -9,12 +9,12 @@ from app.schemas import FeedbackRequest
 
 
 app = FastAPI()
-model = "tinyllama"
-params = "3b"
+model = "llama3.2"
+params = "1b"
 
 try:
-    ollama.pull(f"{model}")
-    print(f"Modelo {model} descargado exitosamente.")
+    ollama.pull(f"{model}:{params}")
+    print(f"Modelo {model}:{params} descargado exitosamente.")
 except Exception as e:
     print(f"Error al descargar el modelo: {e}")
 
