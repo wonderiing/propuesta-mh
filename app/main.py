@@ -9,8 +9,8 @@ from app.schemas import FeedbackRequest
 
 
 app = FastAPI()
-model = "deepseek-r1"
-params = "1.5b"
+model = "llama3.2"
+params = "3b"
 
 try:
     ollama.pull(f"{model}:{params}")
