@@ -62,7 +62,7 @@ async def process_cv(file, job_description):
     """
         
     # Interacción con el modelo Ollama
-    response = ollama.chat(model="llama3.2:1b", messages=[{"role": "user", "content": prompt}])
+    response = ollama.chat(model="llama3.2:3b", messages=[{"role": "user", "content": prompt}])
     evaluacion = response["message"]["content"]
     
     # Guardar los datos en la base de datos

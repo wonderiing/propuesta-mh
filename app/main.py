@@ -10,7 +10,7 @@ from app.schemas import FeedbackRequest
 
 app = FastAPI()
 model = "llama3.2"
-params = "1b"
+params = "3b"
 
 try:
     ollama.pull(f"{model}:{params}")
