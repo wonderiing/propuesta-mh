@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:1106@localhost:5432/tech-mahindra")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:ysQxMqibJSVlwGVrvFbfNpcXQlkOFQhu@caboose.proxy.rlwy.net:29838/railway")
 
 engine = create_engine(DATABASE_URL)
 
