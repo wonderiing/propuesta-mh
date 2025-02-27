@@ -1,6 +1,18 @@
 import ollama
 import os
 from app.models import extract_text_from_pdf, extract_text_from_docx
+from app.database import SessionLocal
+from app.models import CV
+
+
+async def save_cv_to_db(texto: str, job_description: str):
+    db = SessionLocal()
+    nuevo_cv = CV(cv=texto, job_desc=job_description)
+    db.add(nuevo_cv)
+    db.commit()
+    db.refresh(nuevo_cv)
+    db.close()
+    return nuevo_cv
 
 async def process_cv(file, job_description):
     """Procesa el CV, extrayendo texto y enviando la solicitud a Ollama."""
@@ -40,19 +52,23 @@ async def process_cv(file, job_description):
         - **8-9**: El candidato cumple con la mayoría de los requisitos del puesto, aunque podría necesitar capacitación adicional en áreas específicas.
         - **10**: El candidato cumple completamente con todos los requisitos del puesto y tiene la experiencia adecuada para desempeñarse con éxito.
 
-    - **Si el candidato no es adecuado para el puesto y tiene calificacion baja**:
-    - Menciona **2 áreas clave** que el candidato necesita mejorar para cumplir con los requisitos del puesto. Estas áreas deben estar directamente relacionadas con las habilidades y experiencias clave necesarias para el puesto.
+    - **Si el candidato no es adecuado para el puesto y tiene calificación baja**:
+      - Menciona **2 áreas clave** que el candidato necesita mejorar para cumplir con los requisitos del puesto. Estas áreas deben estar directamente relacionadas con las habilidades y experiencias clave necesarias para el puesto.
 
-    - **Si el candidato es adecuado para el puest y tiene una calificacion decente**:
-    - Proporciona **3 razones claras y específicas** por las que el candidato es adecuado para el puesto, basadas en los requisitos detallados en la descripción del trabajo.
+    - **Si el candidato es adecuado para el puesto y tiene una calificación decente**:
+      - Proporciona **3 razones claras y específicas** por las que el candidato es adecuado para el puesto, basadas en los requisitos detallados en la descripción del trabajo.
 
     Nota: Sé **estricto** en la evaluación. Asegúrate de que la evaluación se base principalmente en la relevancia de las habilidades específicas del puesto. Si el candidato no cumple con los requisitos esenciales, **no menciones las razones de adecuación** y otorga una calificación baja.
     """
         
     # Interacción con el modelo Ollama
     response = ollama.chat(model="llama3.2:3b", messages=[{"role": "user", "content": prompt}])
+    evaluacion = response["message"]["content"]
+    
+    # Guardar los datos en la base de datos
+    await save_cv_to_db(text, job_description)
     
     # Limpiamos el archivo temporal
     os.remove(file_path)
 
-    return {"evaluacion": response["message"]["content"]}
+    return {"evaluacion": evaluacion}

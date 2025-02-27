@@ -1,11 +1,22 @@
 from fastapi import FastAPI, UploadFile, File, Body
 from fastapi.middleware.cors import CORSMiddleware
+import os
+import ollama
 
 from app.services import process_cv
 from app.models import extract_text_from_pdf, extract_text_from_docx
 from app.schemas import FeedbackRequest
 
+
 app = FastAPI()
+model = "llama3.2"
+params = "3b"
+
+try:
+    ollama.pull(f"{model}:{params}")
+    print(f"Modelo {model}:{params} descargado exitosamente.")
+except Exception as e:
+    print(f"Error al descargar el modelo: {e}")
 
 # Configuración de CORS
 app.add_middleware(
