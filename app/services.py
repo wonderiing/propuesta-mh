@@ -7,10 +7,8 @@ from app.models import extract_text_from_pdf, extract_text_from_docx
 from app.database import SessionLocal
 from app.models import CV
 
-# Executor para operaciones I/O bound
 executor = ThreadPoolExecutor(max_workers=5)
 
-# Plantilla del prompt pre-definida para evitar concatenaciones repetidas
 PROMPT_TEMPLATE = """
 Analiza el CV del candidato y evalúa su adecuación para el puesto basado en la descripción del trabajo:
 
@@ -64,7 +62,6 @@ def extract_text(file_path, file_ext):
 async def query_ollama(cv_text, job_description):
     """Consulta al modelo Ollama de manera asíncrona"""
     prompt = PROMPT_TEMPLATE.format(job_description=job_description, cv_text=cv_text)
-    # Convertir la llamada a Ollama en asíncrona usando to_thread
     return await asyncio.to_thread(
         lambda: ollama.chat(model="llama3.2:3b", messages=[{"role": "user", "content": prompt}])
     )
@@ -76,27 +73,20 @@ async def process_cv(file, job_description):
     if file_ext not in ["pdf", "docx"]:
         return {"error": "Formato no soportado"}
     
-    # Usar NamedTemporaryFile para gestión automática de archivos temporales
     with NamedTemporaryFile(suffix=f".{file_ext}", delete=False) as temp_file:
-        # Leer el archivo de forma más eficiente
         temp_file.write(await file.read())
         temp_file_path = temp_file.name
     
     try:
-        # Extraer texto en un thread separado
         text = await asyncio.to_thread(extract_text, temp_file_path, file_ext)
         
-        # Paralelizar la consulta a Ollama y guardar en DB
         ollama_task = query_ollama(text, job_description)
         db_task = save_cv_to_db(text, job_description)
-        
-        # Esperar que ambas tareas terminen
-        response, _ = await asyncio.gather(ollama_task, db_task)
+                response, _ = await asyncio.gather(ollama_task, db_task)
         
         evaluacion = response["message"]["content"]
         return {"evaluacion": evaluacion}
     
     finally:
-        # Asegurar que se elimine el archivo temporal
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
