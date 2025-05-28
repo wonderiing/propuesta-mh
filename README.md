@@ -33,8 +33,8 @@ Follow these steps to get the project up and running:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone <YOUR_REPOSITORY_URL>
-    cd <your_repository_directory_name>
+    git clone https://github.com/wonderiing/propuesta-mh
+    cd propuesta-mh
     ```
 
 2.  **Create and Activate a Virtual Environment:**
@@ -73,6 +73,30 @@ Follow these steps to get the project up and running:
     ```
     *Note: The exact Ollama integration might require a specific client library or direct HTTP calls. Adjust `ollama` dependency as needed based on your implementation.*
 
+## Database Setup with Alembic
+
+This project uses Alembic for database migrations.
+
+1.  **Initialize Alembic (First Time Only):**
+    If this is a new project and Alembic hasn't been initialized, run:
+    ```bash
+    alembic init alembic
+    ```
+    This creates an `alembic` directory and an `alembic.ini` configuration file.
+
+2.  **Generate Initial Migration:**
+    After defining your database models in your Python code (e.g., `models.py`), you can auto-generate a migration script based on your models. Make sure your `env.py` in the `alembic` directory is correctly configured to discover your models.
+    ```bash
+    alembic revision --autogenerate -m "Create initial tables"
+    ```
+    This command will create a new migration file in `alembic/versions/`. Review this file to ensure it correctly reflects your desired schema.
+
+3.  **Apply Migrations to the Database:**
+    To apply all pending migrations and create your database tables, run:
+    ```bash
+    alembic upgrade head
+    ```
+    This will bring your database schema up to the latest version defined by your migration scripts.
 ---
 
 ## Running the API
@@ -85,7 +109,6 @@ Once you've completed the setup, you can run the FastAPI application:
     ```bash
     uvicorn main:app --reload
     ```
-    * Replace `main:app` with the actual name of your Python file and FastAPI app instance if they are different (e.g., `my_api_file:my_fastapi_app`).
     * The `--reload` flag is useful during development as it automatically restarts the server on code changes.
 
 3.  **Access the API Documentation:**
@@ -99,25 +122,20 @@ Once you've completed the setup, you can run the FastAPI application:
 
 ## API Endpoints
 
-### `POST /filter-candidate/`
+### `POST /processar-cv/`
 
 This endpoint processes a job description and a candidate's CV to provide a compatibility score and feedback.
 
 * **Request Body:** `multipart/form-data`
     * `job_description` (string): The text describing the job requirements.
-    * `cv_file` (file): The candidate's CV in PDF or DOCX format.
+    * `file` (file): The candidate's CV in PDF or DOCX format.
 
 * **Responses:**
     * `200 OK`: Successful processing.
         ```json
         {
-          "score": 85,
-          "feedback": "Strong match with relevant experience in AI and machine learning. Lacks specific project examples mentioned in the job description."
+            "evaluacion": "**Calificación del candidato: 8**\n\nEl candidato Carlos Rodriguez parece ser adecuado para el puesto de backend developer con experiencia en NestJS y Express. A continuación, se presentan tres razones por las que es adecuado para el puesto:\n\n1. **Experiencia en desarrollo de backend**: El candidato tiene experiencia en la creación de robustos sistemas de backend, lo cual es fundamental para este puesto.\n2. **Conocimientos de TypeScript y NestJS**: La habilidad del candidato en TypeScript y NestJS es relevante para el puesto, ya que se requiere experiencia en estas tecnologías.\n3. **Interés en seguridad y rendimiento**: El candidato muestra interés en la seguridad y el rendimiento, áreas clave en el desarrollo de backend, lo cual es positivo para este puesto.\n\nSin embargo, se podría considerar capacitación adicional en áreas específicas como la experiencia con Express.js (se menciona que utilizó JavaScript y MySQL en su proyecto \"Barry\") o la experiencia con bases de datos relacionales como PostgreSQL."
         }
         ```
     * `400 Bad Request`: Invalid input (e.g., missing file, unsupported file type).
     * `500 Internal Server Error`: An error occurred during processing (e.g., Ollama model not running, internal processing issue).
-
----
-
-## Project Structure (Example)
