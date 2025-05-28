@@ -3,9 +3,9 @@ import os
 import asyncio
 from tempfile import NamedTemporaryFile
 from concurrent.futures import ThreadPoolExecutor
-from app.models import extract_text_from_pdf, extract_text_from_docx
+from app.parsers import extract_text_from_pdf, extract_text_from_docx
 from app.database import SessionLocal
-from app.models import CV
+from app.schemas import CV
 
 executor = ThreadPoolExecutor(max_workers=5)
 
@@ -82,7 +82,7 @@ async def process_cv(file, job_description):
         
         ollama_task = query_ollama(text, job_description)
         db_task = save_cv_to_db(text, job_description)
-                response, _ = await asyncio.gather(ollama_task, db_task)
+        response, _ = await asyncio.gather(ollama_task, db_task)
         
         evaluacion = response["message"]["content"]
         return {"evaluacion": evaluacion}

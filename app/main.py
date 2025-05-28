@@ -4,11 +4,13 @@ import os
 import ollama
 
 from app.services import process_cv
-from app.models import extract_text_from_pdf, extract_text_from_docx
+from app.parsers import extract_text_from_pdf, extract_text_from_docx
 from app.schemas import FeedbackRequest
 
 
 app = FastAPI()
+
+#Here you can change the model
 model = "llama3.2"
 params = "3b"
 
