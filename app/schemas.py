@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
+from app.database import Base
 
-Base = declarative_base()
+
 
 class FeedbackRequest(BaseModel):
     candidato: str
